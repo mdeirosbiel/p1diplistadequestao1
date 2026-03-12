@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões DIP — P1 (Parte 1)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #e6edf3;
+        }
+
+        header p {
+            color: #8b949e;
+            font-size: 0.95em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #161b22;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-label {
+            color: #8b949e;
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            color: #58a6ff;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .tab-btn {
+            padding: 10px 15px;
+            background: transparent;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #8b949e;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            border-color: #58a6ff;
+            color: #58a6ff;
+        }
+
+        .tab-btn.active {
+            background: #388bfd;
+            border-color: #388bfd;
+            color: #fff;
+        }
+
+        .questions-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .question-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .question-card:hover {
+            border-color: #30363d;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.1);
+        }
+
+        .question-number {
+            font-size: 0.8em;
+            color: #8b949e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .question-text {
+            color: #e6edf3;
+            font-weight: 500;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 12px 15px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #e6edf3;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option:hover:not(.disabled) {
+            border-color: #58a6ff;
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        .option.selected {
+            border-color: #3fb950;
+            background: rgba(63, 185, 80, 0.1);
+            color: #3fb950;
+        }
+
+        .option.selected.incorrect {
+            border-color: #f85149;
+            background: rgba(248, 81, 73, 0.1);
+            color: #f85149;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .option-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            background: #30363d;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .option.selected .option-letter,
+        .option.selected.incorrect .option-letter {
+            background: currentColor;
+            color: #0d1117;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(88, 166, 255, 0.1);
+            border-left: 3px solid #388bfd;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .explanation-title {
+            color: #58a6ff;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .explanation-text {
+            color: #c9d1d9;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            background: transparent;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #58a6ff;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: #58a6ff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+
+        @media (max-width: 600px) {
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            header h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Questões DIP — P1</h1>
+            <p>Parte 1: Aulas 02-02 a 02-13</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-label">Corretas:</span>
+                    <span class="stat-value" id="correct-count">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">/</span>
+                    <span class="stat-value" id="total-count">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="tabs" id="tabs"></div>
+
+        <div id="content"></div>
+
+        <div class="action-buttons">
+            <button class="btn" onclick="resetCurrentTab()">Resetar Esta Aula</button>
+            <button class="btn" onclick="resetAll()">Resetar Tudo</button>
+        </div>
+    </div>
+
+    <script>
+        const questionData =         {
+            "02-02": [
+                {"pergunta": "Qual é o pilar fundamental do raciocínio clínico?", "opcoes": ["Confiar em culturas microbiológicas", "Solicitar todos os testes diagnósticos", "Prescrever antibiótico imediatamente", "Considerar apenas apresentação clínica", "Integrar história, epidemiologia e exame físico"], "correta": 2, "explicacao": "Raciocínio integrado é essencial em infectologia."},
+                {"pergunta": "Qual medida quebra a cadeia de transmissão?", "opcoes": ["Isolamento baseado no tipo de transmissão", "Álcool 70% em todas as superfícies", "Desinfecção apenas após alta", "Vacinação preventiva de contactantes", "Educação do paciente sobre higiene"], "correta": 0, "explicacao": "Isolamento apropriado quebra a cadeia de transmissão."},
+                {"pergunta": "Por que epidemiologia local é crítica?", "opcoes": ["Simplifica prescrição de fármacos", "Elimina necessidade de exame físico", "Reduz custos de investigação", "Doenças têm distribuição geográfica distinta", "Permite evitar testes diagnósticos"], "correta": 3, "explicacao": "Prevalência local orienta a suspeita diagnóstica."},
+                {"pergunta": "Como status imunológico modifica apresentação?", "opcoes": ["Imunossuprimidos têm apresentações atípicas", "Afeta apenas duração do tratamento", "Modifica apenas a gravidade", "Não modifica apresentação", "Imunocompetentes têm mais sintomas"], "correta": 1, "explicacao": "Hospedeiro imunocomprometido tem apresentações diferentes."},
+                {"pergunta": "Qual é diferença entre isolamentos?", "opcoes": ["Ambos protegem contra todos agentes", "Ambos requerem mesmos EPIs", "Respiratório não protege profissionais", "Respiratório contra gotículas; contato contra superfícies", "Contato é menos rigoroso"], "correta": 4, "explicacao": "Cada isolamento quebra uma via específica de transmissão."},
+                {"pergunta": "Por que compreender síndromes é importante?", "opcoes": ["Elimina conhecimento epidemiológico", "Reduz investigação diagnóstica", "Facilita memorização de patógenos", "Permite prescrição empírica", "Múltiplas doenças apresentam-se similarmente"], "correta": 0, "explicacao": "Síndromes orientam diagnóstico diferencial sistemático."},
+                {"pergunta": "Qual é importância da imunologia?", "opcoes": ["É aplicada apenas em pesquisa", "É conteúdo separado sem aplicação", "Resposta imune determina apresentação", "Infectologia não requer imunologia", "É importante apenas para imunodeficientes"], "correta": 3, "explicacao": "Sem imunologia, infectologia fica desconectada."},
+                {"pergunta": "Qual informação é MENOS importante?", "opcoes": ["Achados do exame físico", "Sintomas progressivos", "Cor preferida do paciente", "Contatos doentes recentes", "História sexual e exposições"], "correta": 2, "explicacao": "Características pessoais não-médicas são irrelevantes."},
+                {"pergunta": "Como se manifestam apresentações atípicas?", "opcoes": ["Inflamação mínima e infecções raras", "Sintomatologia sempre é típica", "Imunossuprimidos não têm infecções", "Apresentam sintomas como imunocompetentes", "Imunossuprimidos têm sintomas piores"], "correta": 1, "explicacao": "Resposta inflamatória diminuída causa apresentações atípicas."},
+                {"pergunta": "Qual é mecanismo de isolamento?", "opcoes": ["Melhora apenas higiene pessoal", "Elimina patógeno do ambiente", "Reduz sintomas do paciente", "Impede contato entre fonte e hospedeiros", "Aumenta imunidade do paciente"], "correta": 4, "explicacao": "Isolamento quebra a cadeia de transmissão."}
+            ],
+            "02-06": [
+                {"pergunta": "Qual achado diferencia tuberculóide?", "opcoes": ["Mancha única bem demarcada com anestesia", "Vesículas em dermátomos", "Múltiplas pápulas disseminadas", "Placas eritematosas confluentes", "Úlceras profundas com bordas"], "correta": 0, "explicacao": "Tuberculóide: lesão única, bem delimitada, anestésica."},
+                {"pergunta": "Qual é via de entrada do bacilo?", "opcoes": ["Inoculação percutânea acidental", "Lesão de pele com contato", "Via respiratória com tosse", "Mucosa intestinal", "Mucosa nasal durante bacteremia"], "correta": 3, "explicacao": "M. leprae coloniza primariamente mucosa nasal."},
+                {"pergunta": "Por que há sequência térmica → tátil → dolorosa?", "opcoes": ["Nervos para temperatura têm menor resistência", "É coincidência sem base fisiopatológica", "Varia entre indivíduos", "Depende do tipo de bactéria", "Nervo vago é afetado primeiro"], "correta": 1, "explicacao": "Sequência relacionada à vulnerabilidade de fibras nervosas."},
+                {"pergunta": "Qual implicação tem índice bacilífero?", "opcoes": ["Indica cepa sensível a fármacos", "Significa cura mais rápida", "Indica ótima resposta imunológica", "Indica alta infectividade e isolamento", "Não tem implicação clínica"], "correta": 4, "explicacao": "Multibacilar = alta infectividade + risco de resistência."},
+                {"pergunta": "Qual achado correlaciona com destruição?", "opcoes": ["Espessamento de nervos periféricos", "Manchas hipoestésicas", "Úlceras em áreas insensatas por trauma", "Edema de extremidades inferiores", "Alopecia progressiva em couro"], "correta": 2, "explicacao": "Perda sensorial causa traumas repetidos e úlceras."},
+                {"pergunta": "Como reação reversa difere de eritema?", "opcoes": ["Não há diferença clínica relevante", "Eritema nodoso é mais comum", "Ambas são manifestações sistêmicas", "Reversa: lesão cutânea; nodoso: nódulos sistêmicos", "Reversa ocorre apenas tuberculóide"], "correta": 3, "explicacao": "Reação reversa: lesões locais; eritema: sistêmico."},
+                {"pergunta": "Qual é período de latência?", "opcoes": ["Sempre < 6 meses", "Altamente variável, meses a 10+ anos", "Não existe período latente", "Manifestação ocorre em dias", "Tipicamente 2-4 semanas"], "correta": 0, "explicacao": "Período longo dificulta rastreamento de contactantes."},
+                {"pergunta": "Como estigma prejudica controle?", "opcoes": ["Só é problema em países desenvolvidos", "Não tem relação com controle", "Apenas afeta aspecto psicológico", "Prejudica detecção, adesão e rastreamento", "Estigma facilita diagnóstico"], "correta": 4, "explicacao": "Preconceito causa atraso e abandono do tratamento."},
+                {"pergunta": "Qual característica diferencia borderline?", "opcoes": ["Não existe forma borderline", "É forma transitória com caracteres intermediários", "Tem prognóstico melhor", "É sempre paucibacilar", "É sinônimo de tuberculóide"], "correta": 1, "explicacao": "Borderline: caracteres intermediários, instabilidade."},
+                {"pergunta": "Qual mecanismo causa perda sensorial?", "opcoes": ["Desmielinização reversível", "Compressão vascular apenas", "Edema neural sem morte celular", "Inflamação granulomatosa dos nervos", "Destruição por citotoxinas bacterianas"], "correta": 2, "explicacao": "Granulomatosa destrói axônios e mielina progressivamente."}
+            ],
+            "02-09": [
+                {"pergunta": "Qual foi mudança paradigmática?", "opcoes": ["Rejeição de vacinação", "De diagnósticos isolados para síndromes", "De sindrômica para diagnósticos isolados", "Substituição de cultura por clínica", "Abandono de epidemiologia"], "correta": 4, "explicacao": "Evolução: diagnósticos isolados → síndromes → mecanismos."},
+                {"pergunta": "Por que tuberculose é desafiadora?", "opcoes": ["Requer apenas memorização", "Aparece em todas as especialidades", "Afeta populações específicas", "Tem tratamento simples", "É doença rara"], "correta": 1, "explicacao": "TB: epidemiologia variável, complicações multissistêmicas."},
+                {"pergunta": "Qual impacto de antibióticos?", "opcoes": ["Simplificou totalmente manejo", "Transformou infecções em doenças treináveis", "Eliminou diagnóstico microbiológico", "Reduziu importância de epidemiologia", "Permitiu abandono de prevenção"], "correta": 3, "explicacao": "Antibióticos revolucionaram, mas criaram resistência."},
+                {"pergunta": "Como resistência transformou estratégias?", "opcoes": ["Permitiu monoterapia com fármacos potentes", "Simplificou seleção de antibióticos", "Eliminou investigação microbiológica", "Exigiu terapias combinadas e vigilância", "Tornou tratamento empírico adequado"], "correta": 0, "explicacao": "Resistência: terapias combinadas, testes, vigilância."},
+                {"pergunta": "Qual é relevância de TB no Brasil?", "opcoes": ["TB é problema resolvido", "TB tem sempre resistência", "TB só afeta marginalizados", "Epidemiologia não varia", "TB tem alta prevalência"], "correta": 2, "explicacao": "Brasil: país com TB endêmica de importância."},
+                {"pergunta": "Por que antibióticos em todas especialidades?", "opcoes": ["Qualquer paciente pode ter infecção", "Eliminam qualquer infecção", "Reduzem custos hospitalares", "Usados indiscriminadamente", "Hospitais obrigam seu uso"], "correta": 1, "explicacao": "Qualquer especialidade pode ter pacientes infectados."},
+                {"pergunta": "Qual é desafio em TB urbana?", "opcoes": ["TB não ocorre em áreas urbanas", "Pacientes sempre aderem", "Múltiplas cepas, transmissão rápida", "Falta métodos diagnósticos", "TB urbana é sempre benigna"], "correta": 4, "explicacao": "Urbanização: aglomeração, transmissão rápida, resistência."},
+                {"pergunta": "Como evolução permitiu diagnóstico?", "opcoes": ["Aumentando testes", "Ignorando epidemiologia", "Compreendendo síndromes", "Abandonando exame físico", "Prescrevendo antibióticos"], "correta": 2, "explicacao": "Síndromes + epidemiologia = diagnóstico rápido."},
+                {"pergunta": "Qual implicação de TB-XDR?", "opcoes": ["Sem implicação significativa", "Torna tratamento mais simples", "Afeta apenas em desenvolvimento", "Exige esquemas complexos", "TB-XDR responde antigos"], "correta": 3, "explicacao": "TB-XDR: mortalidade elevada, tratamento prolongado."},
+                {"pergunta": "Por que integração melhora diagnóstico?", "opcoes": ["Permite reconhecer padrões", "Aumenta tempo consulta", "Apenas complica abordagem", "Resulta diagnóstico empírico", "Substitui testes"], "correta": 0, "explicacao": "Integração: padrão sindrômico + epidemiologia = rápido."}
+            ],
+            "02-13": [
+                {"pergunta": "Qual característica epidemiológica de ISTs?", "opcoes": ["Parceiros nunca transmitem", "Transmissão sexual permite rastreio", "ISTs sem transmissão sexual", "Rastreamento desnecessário", "ISTs apenas múltiplos parceiros"], "correta": 1, "explicacao": "Transmissão sexual = oportunidade para rastreio."},
+                {"pergunta": "Como assintomática gonorreia prejudica?", "opcoes": ["Sintomas sempre referidos", "Gonorreia faríngea sempre sintomas", "Sem gonorreia faríngea", "Pacientes não sabem que transmitem", "Faringe nunca é sítio"], "correta": 4, "explicacao": "Gonorreia faríngea: assintomática mas infectante."},
+                {"pergunta": "Qual mecanismo diferencia sífilis?", "opcoes": ["Apenas transfusão", "Contacto percutâneo com lesão", "Apenas genital", "Não é transmitida sexualmente", "Idêntico a outras ISTs"], "correta": 0, "explicacao": "Sífilis: úlcera + microabrasões = inoculação."},
+                {"pergunta": "Por que sífilis em gestante precisa?", "opcoes": ["Assintomática não infecciosa", "Tratamento não previne", "Não se transmite verticalmente", "Antibióticos recomendados sempre", "Transmissão vertical grave"], "correta": 2, "explicacao": "Sífilis congênita: manifestações graves; penicilina previne."},
+                {"pergunta": "Qual é risco conjuntivite neonatal?", "opcoes": ["Irritação alérgica leve", "Regressão espontânea", "Ceratoconjuntivite com risco cegueira", "Sem risco oftalmológico", "Irritação transitória"], "correta": 3, "explicacao": "Oftalmia: prevenida com nitrato ou eritromicina."},
+                {"pergunta": "Como sintomas diferem na gonorreia?", "opcoes": ["Mulheres piores", "Mulheres assintomáticas; homens disúria", "Sem diferença entre sexos", "Homens assintomáticos", "Idênticos entre sexos"], "correta": 4, "explicacao": "Mulheres: cervicite assintomática; homens: uretritecom sintomas."},
+                {"pergunta": "Qual princípio fundamenta tratamento?", "opcoes": ["Apenas paciente índice", "Tratamento pareado quebra cadeia", "Parceiros nunca tratam", "Parceiros portar sem tratamento", "Preventivo ineficaz"], "correta": 1, "explicacao": "Cadeia: A→B→C; tratar A+B quebra transmissão."},
+                {"pergunta": "Por que rastreamento crítico?", "opcoes": ["Apenas em pacientes sintomáticos", "Muitas ISTs transmissíveis assintomáticas", "Todos com ISTs têm sintomas", "Rastreamento não altera história", "Assintomáticos não transmitem"], "correta": 3, "explicacao": "Assintomático = infectante; rastreio identifica."},
+                {"pergunta": "Qual achado diferencia sífilis?", "opcoes": ["VDRL/RPR não diferencia", "Cultura positiva sempre", "VDRL+ diferencia ativa de pregressa", "Apenas soropositivo ativo", "Sem diferença laboratorial"], "correta": 0, "explicacao": "VDRL: inflamação; TPPA: treponêmico sempre."},
+                {"pergunta": "Como preconceito afeta diagnóstico?", "opcoes": ["Disparidades apenas biológicas", "Não contribui a disparidades", "Estigma impede cuidado", "Apenas psicológico", "Saúde sem discriminação"], "correta": 2, "explicacao": "Estigma: atraso diagnóstico, qualidade reduzida."}
+            ],
+            "02-20": [
+                {"pergunta": "Qual mutação permitiu HIV?", "opcoes": ["Perda em monócitos", "Integração genômica apenas", "HIV sem mutações", "Eliminação co-receptores", "Tropismo para CD4+ adaptado"], "correta": 3, "explicacao": "HIV-1: adaptação zoonótica permitiu CD4+."},
+                {"pergunta": "Como CD4 < 200 prediz infecções?", "opcoes": ["Qualquer CD4 risco igual", "Independem CD4", "CD4 < 200: PCP/toxo; < 50: CMV/cripto", "CD4 não prediz", "< 50 apenas cutâneos"], "correta": 0, "explicacao": "CD4 define thresholds de risco específicos."},
+                {"pergunta": "Qual mecanismo causa latência?", "opcoes": ["Ausência total replicação", "Não integra, epissomal", "Integrase liga cromossomo", "Apenas linfócitos B", "Mecanismo não compreendido"], "correta": 4, "explicacao": "Integração permite latência em reservatórios."},
+                {"pergunta": "Por que TARV transformou AIDS?", "opcoes": ["Causa mais dano", "Supressão permite reconstitução", "Apenas prolonga meses", "Não afeta expectativa", "TARV cura completamente"], "correta": 1, "explicacao": "HIV indetectável = inaplicável; expectativa normal."},
+                {"pergunta": "Qual impacto disparidades?", "opcoes": ["Tratamento igual sempre", "Não afetam epidemia", "Apenas social", "Biologicamente determinada", "Acesso perpetua transmissão"], "correta": 2, "explicacao": "Inequidade: acesso limitado = transmissão."},
+                {"pergunta": "Como resistência restringe opções?", "opcoes": ["Não afeta escolha", "Não afeta prognóstico", "Sempre aderência inadequada", "Mutações requerem testes genotípicos", "Revertam espontaneamente"], "correta": 0, "explicacao": "Resistência: testes genotípicos, mudança esquema."},
+                {"pergunta": "Por que prevenção multifatorial?", "opcoes": ["Responsabilidade individual", "Uma estratégia tudo", "Apenas sexual", "Múltiplas rotas PrEP, PEP, TARV", "Ineficaz sempre"], "correta": 3, "explicacao": "Multifatorial: PrEP, PEP, TARV, educação."},
+                {"pergunta": "Qual significado CV indetectável?", "opcoes": ["Inaplicável (U=U)", "Ainda transmitem", "Não afeta transmissão", "Apenas CD4 importa", "Cura definitiva"], "correta": 2, "explicacao": "U=U: supressão elimina transmissão sexual."},
+                {"pergunta": "Como monitoramento guia terapia?", "opcoes": ["Não necessário", "Apenas prognóstico", "Apenas CD4", "CD4 < 200 profilaxia; CV guia ajuste", "Apenas CV"], "correta": 4, "explicacao": "CD4: imunidade; CV: eficácia TARV; guiam."},
+                {"pergunta": "Por que vulneráveis prevalência?", "opcoes": ["Acesso limitado, estigma", "Não afeta epidemiologia", "TARV não funciona", "Susceptibilidade biológica", "Recusam TARV"], "correta": 1, "explicacao": "Vulnerabilidade estrutural: acesso reduzido."}
+            ],
+            "02-23": [
+                {"pergunta": "Qual diferença febre e hipertermia?", "opcoes": ["Sem diferença clínica", "Processos idênticos", "Hipertermia sempre severa", "Febre: set point; hipertermia: dissipação", "Febre causa dano"], "correta": 2, "explicacao": "Febre: adaptativa; hipertermia: descontrole."},
+                {"pergunta": "Qual citocina desencadeia febre?", "opcoes": ["Apenas citocinas", "TNF-α único", "IL-10 primário", "IL-1 ativa COX hipotalâmica", "Não cruzam barreira"], "correta": 4, "explicacao": "IL-1: pirogênio; estimula COX → PGE2."},
+                {"pergunta": "Como distinguir prodromal?", "opcoes": ["Prodromal: vasodilatação", "Prodromal: frio; defervescência: calor", "Sem correlato clínico", "Sem diferença", "Apresentação idêntica"], "correta": 1, "explicacao": "Prodromal: frio apesar T ↓; defervescência inverso."},
+                {"pergunta": "Qual mecanismo dissipa calor?", "opcoes": ["Apenas radiação", "Aumento metabólico", "Vasodilatação + transpiração defervescência", "Vasoconstrição dissipação", "Não compreendido"], "correta": 3, "explicacao": "Defervescência: vasodilatação + transpiração."},
+                {"pergunta": "Qual definição FOI?", "opcoes": ["Qualquer > 37,5°C", "Apenas internados", "Não responde antibióticos", "Sinônimo infecção crônica", "≥ 38,5°C por ≥ 3 semanas sem diagnóstico"], "correta": 0, "explicacao": "FOI: critério temporal + térmico + diagnóstico não estabelecido."},
+                {"pergunta": "Como PGE2 medeia febre?", "opcoes": ["Liga receptores elevando termostato", "Apenas periférica", "Reduz set point", "Hipotálamo não responde", "Sem prostaglandinas"], "correta": 4, "explicacao": "PGE2 hipotalâmica ↑ set point; AINEs bloqueiam."},
+                {"pergunta": "Qual achado sugere FOI?", "opcoes": ["Linfadenopatia + hepatoesplenomegalia", "Linfonodos sempre", "Sem achado sugere", "Apenas febre isolada", "Exame não ajuda"], "correta": 2, "explicacao": "FOI malignidade: linfadenopatia, organomegalia."},
+                {"pergunta": "Por que antipiréticos falham hipertermia?", "opcoes": ["Febre reduz set point", "Apenas teórico", "Funcionam igual", "Não funcionam nada", "Não existe hipertermia"], "correta": 0, "explicacao": "Hipertermia requer resfriamento físico."},
+                {"pergunta": "Qual importância feeling?", "opcoes": ["Sempre enganosa", "Sem valor", "Não correlaciona", "Apenas testes", "Alerta para urgência"], "correta": 3, "explicacao": "Sepse, malignidade com testes normais."},
+                {"pergunta": "Como cronologia ajuda diagnóstico?", "opcoes": ["Apenas histórica", "Contínua/remitente/intermitente", "Apenas altura", "Sem valor", "Sem correlação"], "correta": 1, "explicacao": "Padrões correlacionam com etiologias."}
+            ],
+            "02-27": [
+                {"pergunta": "Qual relação T. cruzi triatomíneo?", "opcoes": ["Não evoluiu transmissão", "Vetor acidental", "Sempre sangue", "Sem co-evolução", "Adaptação viabilizou transmissão"], "correta": 0, "explicacao": "Co-evolução: T. cruzi adaptou-se triatomíneo."},
+                {"pergunta": "Qual mecanismo diferencia invasão?", "opcoes": ["Não invade", "Invasão passiva", "Apenas extracelular", "Sem invasão aguda", "Vacúolo, replicação, lise"], "correta": 2, "explicacao": "Tripomastigota → amastigota → lise."},
+                {"pergunta": "Por que megaviscera varia geograficamente?", "opcoes": ["Apenas dieta", "Não varia", "Uniforme regiões", "Cepas tropismo diferente", "Genótipo não afeta"], "correta": 4, "explicacao": "Tropismo: cepas diferentes → órgãos diferentes."},
+                {"pergunta": "Qual sinal patognomônico aguda?", "opcoes": ["Sem sinal patognomônico", "Sinal Romaña: edema periorbitário", "Febre isolada", "Úlceras generalizadas", "Rash maculopapular"], "correta": 1, "explicacao": "Romaña: triatomíneo defeca perto olho."},
+                {"pergunta": "Como evolução causa incapacidade?", "opcoes": ["Nunca incapacidade", "Apenas psicológica", "Destruição plexos e miócitos", "Sempre assintomática", "Sempre reversível"], "correta": 3, "explicacao": "Denervação + miocardite crônica = disfunção."},
+                {"pergunta": "Por que rastreamento crítico?", "opcoes": ["Apenas durante gravidez", "Não previne", "Transmissão 5%; tratamento > 95%", "Não afeta transmissão vertical", "Nunca transmite vertical"], "correta": 2, "explicacao": "Benznidazol pré-gravídico: > 95%."},
+                {"pergunta": "Qual importância ciclo?", "opcoes": ["Apenas acadêmico", "Sem estratégia eficaz", "Permite intervenções diretas", "Apenas diagnóstico", "Sem relevância controle"], "correta": 0, "explicacao": "Ciclo: triatomíneo → inseticida → controle."},
+                {"pergunta": "Como carga parasitária afeta?", "opcoes": ["Crônica mais alta", "Não afeta", "Aguda alta; crônica baixa", "Idêntica fases", "Independe"], "correta": 3, "explicacao": "Aguda: PCR alta; crônica: sorologia."},
+                {"pergunta": "Por que cardiomiopatia pior prognóstico?", "opcoes": ["Sempre excelente", "Sempre reversível", "Destruição neuronal + inflamação", "Idêntico outras miocardites", "Mecanismo desconhecido"], "correta": 4, "explicacao": "Denervação + inflamação → refratária."},
+                {"pergunta": "Qual impacto socioeconômico?", "opcoes": ["Recursos sempre adequados", "Prevalência alta, acesso limitado", "Apenas populações ricas", "Apenas saúde", "Sem impacto econômico"], "correta": 1, "explicacao": "Chagas: doença de pobreza; carga econômica."}
+            ],
+            "03-06": [
+                {"pergunta": "Qual característica estrutural sobrevivência?", "opcoes": ["Parede espessa", "Não sobrevive ambiente", "Cápsula polissacarídica", "Espiral fino e flexível", "Mecanismo desconhecido"], "correta": 4, "explicacao": "Leptospira: fina, móvel; dias a semanas."},
+                {"pergunta": "Qual reservatório urbano?", "opcoes": ["Humanos principal", "Roedores sinantrópicos", "Apenas porcos", "Sem reservatório", "Apenas cães"], "correta": 3, "explicacao": "Roedores: portadores assintomáticos leptospirúria."},
+                {"pergunta": "Qual via penetração primária?", "opcoes": ["Ingestão água", "Não penetra mucosas", "Mucosas e lesões pele; abrasões", "Gastrointestinal", "Apenas respiratória"], "correta": 0, "explicacao": "Penetração: mucosas íntegras com fimbriae."},
+                {"pergunta": "Qual diferença temporal fases?", "opcoes": ["Sem diferença", "Leptospiremia 1ª; leptospirúria 2ª-3ª", "Leptospirúria antes", "Leptospirúria sem fase", "Simultâneas sempre"], "correta": 2, "explicacao": "Bifásica: leptospiremia → leptospirúria."},
+                {"pergunta": "Como varia apresentação?", "opcoes": ["Weil apenas febre", "Leve: febre mialgias; Weil: icterícia IRA", "Leve não existe", "Sem variação", "Uniforme sempre"], "correta": 1, "explicacao": "Bifásica: 90% leve; Weil 10%."},
+                {"pergunta": "Qual achado diferencia?", "opcoes": ["Apenas clínica", "Idênticos arboviroses", "Leptospiremia (isolamento/PCR)", "Sem marcador diferenciador", "Sorologia positiva inicial"], "correta": 3, "explicacao": "Aguda: isolamento/PCR; sorologia semana 2+."},
+                {"pergunta": "Por que carga bacilar?", "opcoes": ["Não afeta prognóstico", "Carga alta progressão Weil", "Não pode mensurar", "Mecanismo desconhecido", "Apenas contagem"], "correta": 4, "explicacao": "Carga + virulência → nefrite."},
+                {"pergunta": "Qual mecanismo IRA?", "opcoes": ["Não ocorre IRA", "Nefrite intersticial + tubular", "Glomerulonefrite", "Apenas desidratação", "Apenas hepático"], "correta": 1, "explicacao": "Nefrite intersticial por invasão."},
+                {"pergunta": "Como sorologia evolui?", "opcoes": ["Semana 1: negativa; semana 2: IgM+", "Positiva dia 1", "Nunca positiva", "Não varia tempo", "IgM dia 1"], "correta": 0, "explicacao": "Timing crítico: teste precoce negativo."},
+                {"pergunta": "Qual importância sazonalidade?", "opcoes": ["Epidemiologia não importa", "Uniforme ano todo", "Chuvas: proliferação roedorial", "Apenas tropicais", "Não afeta"], "correta": 2, "explicacao": "Surtos pós-chuva; vigilância intensiva."}
+            ]
+        };
+
+        let currentTab = "02-02";
+        let answered = {};
+
+        function initTabs() {
+            const tabsContainer = document.getElementById('tabs');
+            Object.keys(questionData).forEach(aula => {
+                const btn = document.createElement('button');
+                btn.className = 'tab-btn' + (aula === '02-02' ? ' active' : '');
+                const aulaNames = {'02-02':'02-02 — Raciocínio Clínico e Biossegurança','02-06':'02-06 — Hanseníase','02-09':'02-09 — Epidemiologia e Pensamento Científico','02-13':'02-13 — ISTs'}; btn.textContent = aulaNames[aula] || `Aula ${aula}`;
+                btn.onclick = () => switchTab(aula);
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        function switchTab(aula) {
+            currentTab = aula;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            renderQuestions();
+            updateStats();
+        }
+
+        function renderQuestions() {
+            const content = document.getElementById('content');
+            const questions = questionData[currentTab] || [];
+
+            if (questions.length === 0) {
+                content.innerHTML = '<div class="empty-state">Questões ainda não disponíveis para esta aula.</div>';
+                return;
+            }
+
+            content.innerHTML = '';
+            const grid = document.createElement('div');
+            grid.className = 'questions-grid';
+
+            questions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+
+                const qNum = document.createElement('div');
+                qNum.className = 'question-number';
+                qNum.textContent = `Questão ${idx + 1}`;
+                card.appendChild(qNum);
+
+                const qText = document.createElement('div');
+                qText.className = 'question-text';
+                qText.textContent = q.pergunta;
+                card.appendChild(qText);
+
+                const options = document.createElement('div');
+                options.className = 'options';
+
+                const letters = ['A', 'B', 'C', 'D'];
+                q.opcoes.forEach((opt, optIdx) => {
+                    const option = document.createElement('button');
+                    option.className = 'option';
+                    option.innerHTML = `<span class="option-letter">${letters[optIdx]}</span><span>${opt}</span>`;
+
+                    const key = `${currentTab}-${idx}`;
+                    if (answered[key] !== undefined) {
+                        option.classList.add('disabled');
+                        if (answered[key] === optIdx) {
+                            option.classList.add('selected');
+                            if (optIdx !== q.correta) {
+                                option.classList.add('incorrect');
+                            }
+                        } else if (optIdx === q.correta && answered[key] !== q.correta) {
+                            option.classList.add('selected');
+                        }
+                    }
+
+                    option.onclick = () => {
+                        if (!answered[key]) {
+                            answered[key] = optIdx;
+                            renderQuestions();
+                            updateStats();
+                        }
+                    };
+
+                    options.appendChild(option);
+                });
+
+                card.appendChild(options);
+
+                if (answered[`${currentTab}-${idx}`] !== undefined) {
+                    const exp = document.createElement('div');
+                    exp.className = 'explanation show';
+                    exp.innerHTML = `
+                        <div class="explanation-title">Explicação</div>
+                        <div class="explanation-text">${q.explicacao}</div>
+                    `;
+                    card.appendChild(exp);
+                }
+
+                grid.appendChild(card);
+            });
+
+            content.appendChild(grid);
+        }
+
+        function updateStats() {
+            let correct = 0;
+            let total = 0;
+
+            Object.keys(questionData).forEach(aula => {
+                const questions = questionData[aula];
+                questions.forEach((q, idx) => {
+                    total++;
+                    const key = `${aula}-${idx}`;
+                    if (answered[key] === q.correta) {
+                        correct++;
+                    }
+                });
+            });
+
+            document.getElementById('correct-count').textContent = correct;
+            document.getElementById('total-count').textContent = total;
+        }
+
+        function resetCurrentTab() {
+            const questions = questionData[currentTab];
+            questions.forEach((q, idx) => {
+                delete answered[`${currentTab}-${idx}`];
+            });
+            renderQuestions();
+            updateStats();
+        }
+
+        function resetAll() {
+            answered = {};
+            renderQuestions();
+            updateStats();
+        }
+
+        initTabs();
+        renderQuestions();
+        updateStats();
+    </script>
+</body>
+</html>
